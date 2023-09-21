@@ -6,7 +6,7 @@ import math
 def __main__():
 
     #constants
-    FPS = 1
+    FPS = 5
     WIDTH, HEIGHT = 1000, 1000
     BLACK = (0,0,0)
     WHITE = (255,255,255)
@@ -18,52 +18,13 @@ def __main__():
     pygame.display.set_caption("Game of Life")
     running = True
 
+    """
     reference_rect = Life(500,500, 20, 20, WHITE)
     second_rect = Life(520, 520, 20, 20, WHITE)
     third_rect = Life(540, 520, 20, 20, WHITE)
     fourth_rect = Life(560, 520, 20, 20, WHITE)
-
-    #Gosper Glider Gun
-    a1 = Life(100, 500, 20, 20, WHITE)
-    a2 = Life(120, 500, 20, 20, WHITE)
-    a3 = Life(100, 520, 20, 20, WHITE)
-    a4 = Life(120, 520, 20, 20, WHITE)
-
-    b1 = Life(740, 480, 20, 20, WHITE)
-    b2 = Life(740, 460, 20, 20, WHITE)
-    b3 = Life(760, 480, 20, 20, WHITE)
-    b4 = Life(760, 460, 20, 20, WHITE)
-
-    c1 = Life(260, 500, 20, 20, WHITE)
-    c2 = Life(280, 480, 20, 20, WHITE)
-    c3 = Life(300, 460, 20, 20, WHITE)
-    c4 = Life(320, 460, 20, 20, WHITE)
-    c5 = Life(260, 520, 20, 20, WHITE)
-    c6 = Life(260, 540, 20, 20, WHITE)
-    c7 = Life(280, 560, 20, 20, WHITE)
-    c8 = Life(300, 580, 20, 20, WHITE)
-    c9 = Life(340, 520, 20, 20, WHITE)
-    c10 = Life(380, 520, 20, 20, WHITE)
-    c11 = Life(400, 520, 20, 20, WHITE)
-    c12 = Life(380, 500, 20, 20, WHITE)
-    c13 = Life(360, 480, 20, 20, WHITE)
-    c14 = Life(360, 540, 20, 20, WHITE)
-
-    d1 = Life(460,500, 20, 20, WHITE)
-    d2 = Life(460, 480, 20, 20, WHITE)
-    d3 = Life(460, 460, 20, 20, WHITE)
-    d4 = Life(480, 500, 20, 20, WHITE)
-    d5 = Life(480, 480, 20, 20, WHITE)
-    d6 = Life(480, 460, 20, 20, WHITE)
-    d7 = Life(500, 440, 20, 20, WHITE)
-    d8 = Life(540, 440, 20, 20, WHITE)
-    d9 = Life(540, 420, 20, 20, WHITE)
-    d10 = Life(540, 520, 20, 20, WHITE)
-    d11 = Life(540, 540, 20, 20, WHITE)
-    life_list = [a1,a2,a3,a4,b1,b2,b3,b4,c1,c2,c3,c4,c5,c6,c7,c8,
-                 c9,c10,c11,c12,c13,c14,d1,d2,d3,d4,d5,
-                 d6,d7,d8,d9,d10,d11]
-    """
+    
+    
     life_list = []
     
     life_list.append(reference_rect)
@@ -71,6 +32,16 @@ def __main__():
     life_list.append(third_rect)
     life_list.append(fourth_rect)
     """
+    
+    s1 = Life(500,500,20,20,WHITE)
+    s2 = Life(520,500,20,20,WHITE)
+    s3 = Life(500,520,20,20,WHITE)
+    s4 = Life(520,520,20,20,WHITE)
+    
+    #life_list = [s1,s2,s3,s4]
+    
+    life_list = gosper_glider_generation()
+    
     clock = pygame.time.Clock()
 
     # Grid constants, but I don't think this is the way to handle it...
@@ -171,10 +142,9 @@ def new_life(life_list):
             new_life_dict[(life.get_x() + 20), (life.get_y() - 20)] += 1
         else:
             new_life_dict[(life.get_x() + 20), (life.get_y() - 20)] = 1
-    print(new_life_dict)
+
     for key in new_life_dict:
         if new_life_dict[key] == 3:
-            print(f"Key[0] is {key[0]}, key[1] is {key[1]}")
             new_life = Life(key[0],key[1], 20, 20, (255, 255, 255))
             new_life_list.append(new_life)
     
@@ -206,9 +176,22 @@ def new_life(life_list):
                 # Bottom Right
                 if life.get_x() + 20 == sub_life.get_x() and life.get_y() - 20 == sub_life.get_y():
                     neighbor_count += 1
+
         if neighbor_count == 2 or neighbor_count == 3:
             surviving_life_List.append(life)
     next_generation = new_life_list + surviving_life_List
+    
+    # Remove Duplicates
+    i = 0
+    while i < len(next_generation):
+        j = i+1
+        while j < len(next_generation):
+            if next_generation[i].get_position() == next_generation[j].get_position():
+                next_generation.pop(j)
+                j -= 1
+            j+=1
+        i+=1
+        
     return next_generation
 
 # Just generates a grid based on screen dimensions
@@ -242,5 +225,56 @@ class Life(pygame.Rect):
     
     def get_y(self):
         return self.y
+    
+def gosper_glider_generation():
+    WHITE = (255, 255, 255)
+    
+    # Left Square
+    a1 = Life(100, 500, 20, 20, WHITE)
+    a2 = Life(120, 500, 20, 20, WHITE)
+    a3 = Life(100, 520, 20, 20, WHITE)
+    a4 = Life(120, 520, 20, 20, WHITE)
+
+    # Right Square
+    b1 = Life(780, 480, 20, 20, WHITE)
+    b2 = Life(780, 460, 20, 20, WHITE)
+    b3 = Life(800, 480, 20, 20, WHITE)
+    b4 = Life(800, 460, 20, 20, WHITE)
+    
+    # Left Center Structure
+    c1 = Life(300, 500, 20, 20, WHITE)
+    c2 = Life(300, 520, 20, 20, WHITE)
+    c3 = Life(300, 540, 20, 20, WHITE)
+    c4 = Life(320, 480, 20, 20, WHITE)
+    c5 = Life(320, 560, 20, 20, WHITE)
+    c6 = Life(340, 460, 20, 20, WHITE)
+    c7 = Life(340, 580, 20, 20, WHITE)
+    c8 = Life(360, 460, 20, 20, WHITE)
+    c9 = Life(360, 580, 20, 20, WHITE)
+    c10 = Life(380, 520, 20, 20, WHITE)
+    c11 = Life(400, 480, 20, 20, WHITE)
+    c12 = Life(400, 560, 20, 20, WHITE)
+    c13 = Life(420, 500, 20, 20, WHITE)
+    c14 = Life(420, 520, 20, 20, WHITE)
+    c15 = Life(420, 540, 20, 20, WHITE)
+    c16 = Life(440, 520, 20, 20, WHITE)
+
+    # Right Center Structure
+    d1 = Life(500, 500, 20, 20, WHITE)
+    d2 = Life(500, 480, 20, 20, WHITE)
+    d3 = Life(500, 460, 20, 20, WHITE)
+    d4 = Life(520, 500, 20, 20, WHITE)
+    d5 = Life(520, 480, 20, 20, WHITE)
+    d6 = Life(520, 460, 20, 20, WHITE)
+    d7 = Life(540, 440, 20, 20, WHITE)
+    d8 = Life(540, 520, 20, 20, WHITE)
+    d9 = Life(580, 420, 20, 20, WHITE)
+    d10 = Life(580, 440, 20, 20, WHITE)
+    d11 = Life(580, 520, 20, 20, WHITE)
+    d12 = Life(580, 540, 20, 20, WHITE)
+    life_list = [a1,a2,a3,a4,b1,b2,b3,b4,c1,c2,c3,c4,c5,c6,c7,c8,
+                 c9,c10,c11,c12,c13,c14,c15,c16,d1,d2,d3,d4,d5,
+                 d6,d7,d8,d9,d10,d11,d12]
+    return life_list
     
 __main__()
