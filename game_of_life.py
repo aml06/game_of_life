@@ -64,12 +64,71 @@ def __main__():
         window.fill(BLACK)
         for square in life_list:
             square.draw(window)
+            print(square.position)
         #draw_grid(WIDTH, HEIGHT, cell_size, zoom, window, WHITE, camera_x, camera_y)
 
         pygame.display.flip()
 
     pygame.quit()
     sys.exit()
+
+def new_life(life_list):
+    new_life_dict = {}
+    new_life_list = []
+    for life in life_list:
+        # Top Left
+        if new_life_dict.get((life.x - 20), (life.y + 20)) == None:
+            new_life_dict[(life.x - 20), (life.y + 20)] = 1
+        else:
+            new_life_dict[(life.x - 20), (life.y + 20)] += 1
+            
+        # Top
+        if new_life_dict.get((life.x), (life.y + 20)) == None:
+            new_life_dict[(life.x), (life.y + 20)] = 1
+        else:
+            new_life_dict[(life.x), (life.y + 20)] += 1
+        
+        # Top Right
+        if new_life_dict.get((life.x + 20), (life.y + 20)) == None:
+            new_life_dict[(life.x + 20), (life.y + 20)] = 1
+        else:
+            new_life_dict[(life.x + 20), (life.y + 20)] += 1
+        
+        # Left
+        if new_life_dict.get((life.x - 20), (life.y)) == None:
+            new_life_dict[(life.x - 20), (life.y)] = 1
+        else:
+            new_life_dict[(life.x - 20), (life.y)] += 1
+        
+        # Right
+        if new_life_dict.get((life.x + 20), (life.y)) == None:
+            new_life_dict[(life.x + 20), (life.y)] = 1
+        else:
+            new_life_dict[(life.x + 20), (life.y)] += 1
+            
+        # Bot Left
+        if new_life_dict.get((life.x - 20), (life.y - 20)) == None:
+            new_life_dict[(life.x - 20), (life.y - 20)] = 1
+        else:
+            new_life_dict[(life.x - 20), (life.y - 20)] += 1
+            
+        # Bot
+        if new_life_dict.get((life.x), (life.y - 20)) == None:
+            new_life_dict[(life.x), (life.y - 20)] = 1
+        else:
+            new_life_dict[(life.x), (life.y - 20)] += 1
+            
+        # Bot Right
+        if new_life_dict.get((life.x - 20), (life.y + 20)) == None:
+            new_life_dict[(life.x - 20), (life.y + 20)] = 1
+        else:
+            new_life_dict[(life.x - 20), (life.y + 20)] += 1
+    
+    for key in new_life_dict:
+        if new_life_dict[key] == 3:
+            new_life = life(key[0],key[1], 20, 20, (255, 255, 255))
+            new_life_list.append(new_life)
+    
 
 # Just generates a grid based on screen dimensions
 def draw_grid(width, height, cell_size, zoom, screen, grid_color, camera_x, camera_y):
@@ -86,6 +145,7 @@ class life(pygame.Rect):
         self.width = width
         self.height = height
         self.color = color
+        self.position = (x, y)
     
     def position(self):
         return self.position
