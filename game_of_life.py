@@ -2,16 +2,17 @@ import sys
 import pygame
 import numpy as np
 import math
+import random
 
 def __main__():
 
     #constants
-    FPS = 5
+    FPS = 20
     WIDTH, HEIGHT = 1000, 1000
     BLACK = (0,0,0)
     WHITE = (255,255,255)
     RED = (255, 36, 0)
-
+    
     pygame.init()
 
     window = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
@@ -65,6 +66,20 @@ def __main__():
                 #Program quits with escape
                 if event.key == pygame.K_ESCAPE:
                     running = False
+                    
+                if event.key == pygame.K_EQUALS:
+                    FPS += 1
+                    
+                if event.key == pygame.K_MINUS:
+                    if FPS > 1:
+                        FPS -= 1
+            
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                # Get the position of the mouse click
+                mouseX, mouseY = pygame.mouse.get_pos()
+                print(mouseX, mouseY)
+                click_life = Life(mouseX - (mouseX % 20), mouseY - (mouseY % 20), 20, 20, WHITE)
+                life_list.append(click_life)
 
             # Allows for zooming and scrolling grid
             """
@@ -82,18 +97,22 @@ def __main__():
         window.fill(BLACK)
         for square in life_list:
             square.draw(window)
-            print(square.position)
-        #draw_grid(WIDTH, HEIGHT, cell_size, zoom, window, WHITE, camera_x, camera_y)
+        draw_grid(WIDTH, HEIGHT, cell_size, zoom, window, WHITE, camera_x, camera_y)
         life_list = new_life(life_list)
+        life_list = life_fence(life_list)
         pygame.display.flip()
 
     pygame.quit()
     sys.exit()
 
+# Handles generating new live squares and calculating and removing live squares that will die
 def new_life(life_list):
+    rand_color = False
     new_life_dict = {}
     new_life_list = []
     surviving_life_List = []
+    # Generate dictionary with keys which are locations adjacent to live squares and the value is the count
+    # of neighboring live squares
     for life in life_list:
         # Top Left
         if ((life.get_x() - 20), (life.get_y() + 20)) in new_life_dict:
@@ -142,12 +161,18 @@ def new_life(life_list):
             new_life_dict[(life.get_x() + 20), (life.get_y() - 20)] += 1
         else:
             new_life_dict[(life.get_x() + 20), (life.get_y() - 20)] = 1
-
+    
+    # Check dictionary for dead squares with 3 live neighbors and generate new live square at that location
+    # From the key value pairs in the dictionary
     for key in new_life_dict:
         if new_life_dict[key] == 3:
-            new_life = Life(key[0],key[1], 20, 20, (255, 255, 255))
+            if rand_color == False:
+                new_life = Life(key[0],key[1], 20, 20, (255, 255, 255))
+            else:
+                new_life = Life(key[0],key[1], 20, 20, (random.randint(0,255), random.randint(0,255), random.randint(0,255)))
             new_life_list.append(new_life)
     
+    # Check how many neighbors each square has and do not add it to the next generation list if it has too many or too few
     for life in life_list:
         neighbor_count = 0
         for sub_life in life_list:
@@ -181,7 +206,7 @@ def new_life(life_list):
             surviving_life_List.append(life)
     next_generation = new_life_list + surviving_life_List
     
-    # Remove Duplicates
+    # Remove Duplicate live squares from the combined neighbor generated list and the surviving existing square list
     i = 0
     while i < len(next_generation):
         j = i+1
@@ -194,13 +219,19 @@ def new_life(life_list):
         
     return next_generation
 
+# Removes live squares that get too far away to save on memory
+def life_fence(my_life_list):
+    fenced_list = list(filter(lambda life_cell: -2000 <= life_cell.get_x() <= 2000 or -2000 <= life_cell.get_y() <= 2000, my_life_list))
+    return fenced_list
+
 # Just generates a grid based on screen dimensions
 def draw_grid(width, height, cell_size, zoom, screen, grid_color, camera_x, camera_y):
-    for x in range(-width, width, int(cell_size * zoom)):
+    for x in range(0, width, int(cell_size * zoom)):
         pygame.draw.line(screen, grid_color, (x - camera_x % (cell_size * zoom), -height), (x - camera_x % (cell_size * zoom), height), 1)
-    for y in range(-height, height, int(cell_size * zoom)):
+    for y in range(0, height, int(cell_size * zoom)):
         pygame.draw.line(screen, grid_color, (-width, y - camera_y % (cell_size * zoom)), (width, y - camera_y % (cell_size * zoom)), 1)
 
+# The class of my 'living' squares
 class Life(pygame.Rect):
     def __init__(self, x, y, width, height, color):
         super().__init__(x, y, width, height)
@@ -213,7 +244,7 @@ class Life(pygame.Rect):
     
     def get_position(self):
         return self.position
-
+    # Pondering a more graceful way to handle finding neighboring squares, both live and dead...
     def neighbors(self):
         pass
 
@@ -226,6 +257,7 @@ class Life(pygame.Rect):
     def get_y(self):
         return self.y
     
+# Generates a gosper glider gun at the hard coded location
 def gosper_glider_generation():
     WHITE = (255, 255, 255)
     
