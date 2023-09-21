@@ -22,12 +22,55 @@ def __main__():
     second_rect = Life(520, 520, 20, 20, WHITE)
     third_rect = Life(540, 520, 20, 20, WHITE)
     fourth_rect = Life(560, 520, 20, 20, WHITE)
+
+    #Gosper Glider Gun
+    a1 = Life(100, 500, 20, 20, WHITE)
+    a2 = Life(120, 500, 20, 20, WHITE)
+    a3 = Life(100, 520, 20, 20, WHITE)
+    a4 = Life(120, 520, 20, 20, WHITE)
+
+    b1 = Life(740, 480, 20, 20, WHITE)
+    b2 = Life(740, 460, 20, 20, WHITE)
+    b3 = Life(760, 480, 20, 20, WHITE)
+    b4 = Life(760, 460, 20, 20, WHITE)
+
+    c1 = Life(260, 500, 20, 20, WHITE)
+    c2 = Life(280, 480, 20, 20, WHITE)
+    c3 = Life(300, 460, 20, 20, WHITE)
+    c4 = Life(320, 460, 20, 20, WHITE)
+    c5 = Life(260, 520, 20, 20, WHITE)
+    c6 = Life(260, 540, 20, 20, WHITE)
+    c7 = Life(280, 560, 20, 20, WHITE)
+    c8 = Life(300, 580, 20, 20, WHITE)
+    c9 = Life(340, 520, 20, 20, WHITE)
+    c10 = Life(380, 520, 20, 20, WHITE)
+    c11 = Life(400, 520, 20, 20, WHITE)
+    c12 = Life(380, 500, 20, 20, WHITE)
+    c13 = Life(360, 480, 20, 20, WHITE)
+    c14 = Life(360, 540, 20, 20, WHITE)
+
+    d1 = Life(460,500, 20, 20, WHITE)
+    d2 = Life(460, 480, 20, 20, WHITE)
+    d3 = Life(460, 460, 20, 20, WHITE)
+    d4 = Life(480, 500, 20, 20, WHITE)
+    d5 = Life(480, 480, 20, 20, WHITE)
+    d6 = Life(480, 460, 20, 20, WHITE)
+    d7 = Life(500, 440, 20, 20, WHITE)
+    d8 = Life(540, 440, 20, 20, WHITE)
+    d9 = Life(540, 420, 20, 20, WHITE)
+    d10 = Life(540, 520, 20, 20, WHITE)
+    d11 = Life(540, 540, 20, 20, WHITE)
+    life_list = [a1,a2,a3,a4,b1,b2,b3,b4,c1,c2,c3,c4,c5,c6,c7,c8,
+                 c9,c10,c11,c12,c13,c14,d1,d2,d3,d4,d5,
+                 d6,d7,d8,d9,d10,d11]
+    """
     life_list = []
+    
     life_list.append(reference_rect)
     life_list.append(second_rect)
     life_list.append(third_rect)
     life_list.append(fourth_rect)
-
+    """
     clock = pygame.time.Clock()
 
     # Grid constants, but I don't think this is the way to handle it...
