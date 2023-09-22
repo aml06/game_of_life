@@ -7,7 +7,7 @@ import random
 def __main__():
 
     #constants
-    FPS = 20
+    FPS = 120
     WIDTH, HEIGHT = 1000, 1000
     BLACK = (0,0,0)
     WHITE = (255,255,255)
@@ -34,13 +34,6 @@ def __main__():
     life_list.append(fourth_rect)
     """
     
-    s1 = Life(500,500,20,20,WHITE)
-    s2 = Life(520,500,20,20,WHITE)
-    s3 = Life(500,520,20,20,WHITE)
-    s4 = Life(520,520,20,20,WHITE)
-    
-    #life_list = [s1,s2,s3,s4]
-    
     life_list = gosper_glider_generation()
     
     clock = pygame.time.Clock()
@@ -50,7 +43,12 @@ def __main__():
     grid_color = WHITE
     camera_x, camera_y = 0, 0
     zoom = 1.0
-
+    screen_center = [0,0]
+    
+    # Timing constants
+    count_timer = 0
+    board_control = 20
+    
     while running:
         clock.tick(FPS)
         for event in pygame.event.get():
@@ -67,19 +65,36 @@ def __main__():
                 if event.key == pygame.K_ESCAPE:
                     running = False
                     
-                if event.key == pygame.K_EQUALS:
-                    FPS += 1
-                    
                 if event.key == pygame.K_MINUS:
-                    if FPS > 1:
-                        FPS -= 1
-            
+                    board_control += 1
+                    
+                if event.key == pygame.K_EQUALS:
+                    if board_control > 1:
+                        board_control -= 1
+                        # Makes sure we can't have count_timer ever get larger than board_control
+                        if count_timer > board_control:
+                            count_timer = board_control
+                
+                if event.key == pygame.K_LEFT:
+                    screen_center[0] = screen_center[0] - 2
+                
+                if event.key == pygame.K_RIGHT:
+                    screen_center[0] = screen_center[0] + 2
+                    
+                if event.key == pygame.K_UP:
+                    screen_center[1] = screen_center[1] - 2
+                    
+                if event.key == pygame.K_DOWN:
+                    screen_center[1] = screen_center[1] + 2
+                
             if event.type == pygame.MOUSEBUTTONDOWN:
                 # Get the position of the mouse click
                 mouseX, mouseY = pygame.mouse.get_pos()
                 print(mouseX, mouseY)
                 click_life = Life(mouseX - (mouseX % 20), mouseY - (mouseY % 20), 20, 20, WHITE)
                 life_list.append(click_life)
+                click_life.draw(window)
+                pygame.display.update()
 
             # Allows for zooming and scrolling grid
             """
@@ -93,14 +108,17 @@ def __main__():
                 if event.x < 0:
                     camera_x -= 10 / zoom
             """
-
-        window.fill(BLACK)
-        for square in life_list:
-            square.draw(window)
-        draw_grid(WIDTH, HEIGHT, cell_size, zoom, window, WHITE, camera_x, camera_y)
-        life_list = new_life(life_list)
-        life_list = life_fence(life_list)
-        pygame.display.flip()
+        # Need to update board in a manner seperate from updating screen so can add blocks from clicking smoothly
+        if count_timer == board_control:
+            window.fill(BLACK)
+            for square in life_list:
+                square.draw(window)
+            draw_grid(WIDTH, HEIGHT, cell_size, zoom, window, WHITE, camera_x, camera_y)
+            life_list = new_life(life_list)
+            life_list = life_fence(life_list)
+            pygame.display.flip()
+            count_timer = 0
+        count_timer += 1
 
     pygame.quit()
     sys.exit()
@@ -230,7 +248,7 @@ def draw_grid(width, height, cell_size, zoom, screen, grid_color, camera_x, came
         pygame.draw.line(screen, grid_color, (x - camera_x % (cell_size * zoom), -height), (x - camera_x % (cell_size * zoom), height), 1)
     for y in range(0, height, int(cell_size * zoom)):
         pygame.draw.line(screen, grid_color, (-width, y - camera_y % (cell_size * zoom)), (width, y - camera_y % (cell_size * zoom)), 1)
-
+        
 # The class of my 'living' squares
 class Life(pygame.Rect):
     def __init__(self, x, y, width, height, color):
