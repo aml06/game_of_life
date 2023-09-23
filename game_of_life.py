@@ -266,8 +266,8 @@ class Life(pygame.Rect):
     def neighbors(self):
         pass
 
-    def draw(self, surface):
-        pygame.draw.rect(surface, self.color, (self.x_coord, self.y_coord, self.width, self.height))
+    def draw(self, surface, shift_x = 0, shift_y = 0):
+        pygame.draw.rect(surface, self.color, (self.x_coord + shift_x, self.y_coord + shift_y, self.width, self.height))
 
     def get_x(self):
         return self.x
