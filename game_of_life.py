@@ -4,7 +4,7 @@ import numpy as np
 import math
 import random
 
-def __main__():
+def main():
 
     #constants
     FPS = 120
@@ -12,7 +12,7 @@ def __main__():
     BLACK = (0,0,0)
     WHITE = (255,255,255)
     RED = (255, 36, 0)
-    
+
     pygame.init()
 
     window = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
@@ -43,11 +43,14 @@ def __main__():
     grid_color = WHITE
     camera_x, camera_y = 0, 0
     zoom = 1.0
-    screen_center = [0,0]
+    shift = [0,0]
     
     # Timing constants
     count_timer = 0
     board_control = 20
+
+    # Pygame constant
+    pygame.key.set_repeat(5,50)
     
     while running:
         clock.tick(FPS)
@@ -76,24 +79,24 @@ def __main__():
                             count_timer = board_control
                 
                 if event.key == pygame.K_LEFT:
-                    screen_center[0] = screen_center[0] - 2
-                
+                    shift[0] = shift[0] + 10
+                    pygame.display.flip()
                 if event.key == pygame.K_RIGHT:
-                    screen_center[0] = screen_center[0] + 2
-                    
+                    shift[0] = shift[0] - 10
+                    pygame.display.flip()
                 if event.key == pygame.K_UP:
-                    screen_center[1] = screen_center[1] - 2
-                    
+                    shift[1] = shift[1] + 10
+                    pygame.display.flip()
                 if event.key == pygame.K_DOWN:
-                    screen_center[1] = screen_center[1] + 2
-                
+                    shift[1] = shift[1] - 10
+                    pygame.display.flip()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 # Get the position of the mouse click
                 mouseX, mouseY = pygame.mouse.get_pos()
                 print(mouseX, mouseY)
-                click_life = Life(mouseX - (mouseX % 20), mouseY - (mouseY % 20), 20, 20, WHITE)
+                click_life = Life(mouseX - (mouseX % 20) - shift[0], mouseY - (mouseY % 20) - shift[1], 20, 20, WHITE)
                 life_list.append(click_life)
-                click_life.draw(window)
+                click_life.draw(window, shift[0], shift[1])
                 pygame.display.update()
 
             # Allows for zooming and scrolling grid
@@ -108,12 +111,13 @@ def __main__():
                 if event.x < 0:
                     camera_x -= 10 / zoom
             """
+        
         # Need to update board in a manner seperate from updating screen so can add blocks from clicking smoothly
         if count_timer == board_control:
             window.fill(BLACK)
             for square in life_list:
-                square.draw(window)
-            draw_grid(WIDTH, HEIGHT, cell_size, zoom, window, WHITE, camera_x, camera_y)
+                square.draw(window, shift[0], shift[1])
+            draw_grid(WIDTH, HEIGHT, cell_size, zoom, window, WHITE, shift[0], shift[1])
             life_list = new_life(life_list)
             life_list = life_fence(life_list)
             pygame.display.flip()
@@ -243,11 +247,11 @@ def life_fence(my_life_list):
     return fenced_list
 
 # Just generates a grid based on screen dimensions
-def draw_grid(width, height, cell_size, zoom, screen, grid_color, camera_x, camera_y):
+def draw_grid(width, height, cell_size, zoom, screen, grid_color, shift_x, shift_y):
     for x in range(0, width, int(cell_size * zoom)):
-        pygame.draw.line(screen, grid_color, (x - camera_x % (cell_size * zoom), -height), (x - camera_x % (cell_size * zoom), height), 1)
+        pygame.draw.line(screen, grid_color, (x - shift_x % (cell_size * zoom), -height), (x - shift_x % (cell_size * zoom), height), 1)
     for y in range(0, height, int(cell_size * zoom)):
-        pygame.draw.line(screen, grid_color, (-width, y - camera_y % (cell_size * zoom)), (width, y - camera_y % (cell_size * zoom)), 1)
+        pygame.draw.line(screen, grid_color, (-width, y - shift_y % (cell_size * zoom)), (width, y - shift_y % (cell_size * zoom)), 1)
         
 # The class of my 'living' squares
 class Life(pygame.Rect):
@@ -266,8 +270,11 @@ class Life(pygame.Rect):
     def neighbors(self):
         pass
 
-    def draw(self, surface, shift_x = 0, shift_y = 0):
-        pygame.draw.rect(surface, self.color, (self.x_coord + shift_x, self.y_coord + shift_y, self.width, self.height))
+    def draw(self, surface, shift_x, shift_y):
+        # Hmm wondering why this doesn't work...
+        resolved_x = self.x_coord + shift_x
+        resolved_y = self.y_coord + shift_y
+        pygame.draw.rect(surface, self.color, (resolved_x, resolved_y, self.width, self.height))
 
     def get_x(self):
         return self.x
@@ -326,5 +333,5 @@ def gosper_glider_generation():
                  c9,c10,c11,c12,c13,c14,c15,c16,d1,d2,d3,d4,d5,
                  d6,d7,d8,d9,d10,d11,d12]
     return life_list
-    
-__main__()
+if __name__ == "__main__":
+    main()
