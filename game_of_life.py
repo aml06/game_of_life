@@ -3,6 +3,10 @@ import pygame
 import numpy as np
 import math
 import random
+import time
+#average time is approximately 0.0085 seconds = 8.5 ms, next step is thinking of a faster algorithm
+
+WHITE = (255, 255, 255)
 
 def main():
 
@@ -10,7 +14,6 @@ def main():
     FPS = 120
     WIDTH, HEIGHT = 1000, 1000
     BLACK = (0,0,0)
-    WHITE = (255,255,255)
     RED = (255, 36, 0)
 
     pygame.init()
@@ -19,23 +22,9 @@ def main():
     pygame.display.set_caption("Game of Life")
     running = True
 
-    """
-    reference_rect = Life(500,500, 20, 20, WHITE)
-    second_rect = Life(520, 520, 20, 20, WHITE)
-    third_rect = Life(540, 520, 20, 20, WHITE)
-    fourth_rect = Life(560, 520, 20, 20, WHITE)
-    
-    
-    life_list = []
-    
-    life_list.append(reference_rect)
-    life_list.append(second_rect)
-    life_list.append(third_rect)
-    life_list.append(fourth_rect)
-    """
-    
-    life_list = gosper_glider_generation()
-    
+    life_list = build_life(gosper_glider_builder())
+    print(life_list)
+
     clock = pygame.time.Clock()
 
     # Grid constants, but I don't think this is the way to handle it...
@@ -51,8 +40,12 @@ def main():
 
     # Pygame constant
     pygame.key.set_repeat(5,50)
+
+    # Mouse Drag
+    drag = False
     
     while running:
+
         clock.tick(FPS)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -94,7 +87,7 @@ def main():
                 # Get the position of the mouse click
                 mouseX, mouseY = pygame.mouse.get_pos()
                 print(mouseX, mouseY)
-                click_life = Life(mouseX - (mouseX % 20) - shift[0], mouseY - (mouseY % 20) - shift[1], 20, 20, WHITE)
+                click_life = Life(mouseX - ((mouseX + shift[0]) % 20) - shift[0], mouseY - ((mouseY + shift[1]) % 20) - shift[1], 20, 20, WHITE)
                 life_list.append(click_life)
                 click_life.draw(window, shift[0], shift[1])
                 pygame.display.update()
@@ -252,7 +245,14 @@ def draw_grid(width, height, cell_size, zoom, screen, grid_color, shift_x, shift
         pygame.draw.line(screen, grid_color, (x - shift_x % (cell_size * zoom), -height), (x - shift_x % (cell_size * zoom), height), 1)
     for y in range(0, height, int(cell_size * zoom)):
         pygame.draw.line(screen, grid_color, (-width, y - shift_y % (cell_size * zoom)), (width, y - shift_y % (cell_size * zoom)), 1)
-        
+
+def build_life(inputList):
+    returnList = []
+    for coord in inputList:
+        newLife = Life(coord[0], coord[1], 50, 50, WHITE)
+        returnList.append(newLife)
+    return returnList
+
 # The class of my 'living' squares
 class Life(pygame.Rect):
     def __init__(self, x, y, width, height, color):
@@ -281,57 +281,24 @@ class Life(pygame.Rect):
     
     def get_y(self):
         return self.y
-    
-# Generates a gosper glider gun at the hard coded location
-def gosper_glider_generation():
-    WHITE = (255, 255, 255)
-    
-    # Left Square
-    a1 = Life(100, 500, 20, 20, WHITE)
-    a2 = Life(120, 500, 20, 20, WHITE)
-    a3 = Life(100, 520, 20, 20, WHITE)
-    a4 = Life(120, 520, 20, 20, WHITE)
 
-    # Right Square
-    b1 = Life(780, 480, 20, 20, WHITE)
-    b2 = Life(780, 460, 20, 20, WHITE)
-    b3 = Life(800, 480, 20, 20, WHITE)
-    b4 = Life(800, 460, 20, 20, WHITE)
-    
-    # Left Center Structure
-    c1 = Life(300, 500, 20, 20, WHITE)
-    c2 = Life(300, 520, 20, 20, WHITE)
-    c3 = Life(300, 540, 20, 20, WHITE)
-    c4 = Life(320, 480, 20, 20, WHITE)
-    c5 = Life(320, 560, 20, 20, WHITE)
-    c6 = Life(340, 460, 20, 20, WHITE)
-    c7 = Life(340, 580, 20, 20, WHITE)
-    c8 = Life(360, 460, 20, 20, WHITE)
-    c9 = Life(360, 580, 20, 20, WHITE)
-    c10 = Life(380, 520, 20, 20, WHITE)
-    c11 = Life(400, 480, 20, 20, WHITE)
-    c12 = Life(400, 560, 20, 20, WHITE)
-    c13 = Life(420, 500, 20, 20, WHITE)
-    c14 = Life(420, 520, 20, 20, WHITE)
-    c15 = Life(420, 540, 20, 20, WHITE)
-    c16 = Life(440, 520, 20, 20, WHITE)
+def gosper_glider_builder():
 
-    # Right Center Structure
-    d1 = Life(500, 500, 20, 20, WHITE)
-    d2 = Life(500, 480, 20, 20, WHITE)
-    d3 = Life(500, 460, 20, 20, WHITE)
-    d4 = Life(520, 500, 20, 20, WHITE)
-    d5 = Life(520, 480, 20, 20, WHITE)
-    d6 = Life(520, 460, 20, 20, WHITE)
-    d7 = Life(540, 440, 20, 20, WHITE)
-    d8 = Life(540, 520, 20, 20, WHITE)
-    d9 = Life(580, 420, 20, 20, WHITE)
-    d10 = Life(580, 440, 20, 20, WHITE)
-    d11 = Life(580, 520, 20, 20, WHITE)
-    d12 = Life(580, 540, 20, 20, WHITE)
-    life_list = [a1,a2,a3,a4,b1,b2,b3,b4,c1,c2,c3,c4,c5,c6,c7,c8,
-                 c9,c10,c11,c12,c13,c14,c15,c16,d1,d2,d3,d4,d5,
-                 d6,d7,d8,d9,d10,d11,d12]
-    return life_list
+    figure_a = [(100, 500), (120, 500), (100, 520), (120, 520)]
+    
+    figure_b = [(780, 480), (780, 460), (800, 480), (800, 460)]
+
+    figure_c = [(300, 500), (300, 520), (300, 540), (320, 480), (320, 560),
+                (340, 460), (340, 580), (360, 460), (360, 580), (380, 520),
+                (400, 480), (400, 560), (420, 500), (420, 520), (420, 540),
+                (440, 520)]
+
+    figure_d = [(500, 500), (500, 480), [500, 460], (520, 500), (520, 480), (520, 460),
+                (540, 440), (540, 520), (580, 420), (580, 440), (580, 520), (580, 540)]
+
+    fig_list = figure_a + figure_b + figure_c + figure_d
+
+    return fig_list
+
 if __name__ == "__main__":
     main()
