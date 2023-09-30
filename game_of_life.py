@@ -98,7 +98,7 @@ def main():
                 print(mouseX, mouseY)
                 click_life = Life(mouseX - ((mouseX + shift[0]) % 20) - shift[0], mouseY - ((mouseY + shift[1]) % 20) - shift[1], 20, 20, WHITE)
                 life_list.append(click_life)
-                click_life.draw(window, shift[0], shift[1])
+                click_life.draw(window, shift[0], shift[1], zoom)
                 pygame.display.update()
             
         # Need to update board in a manner seperate from updating screen so can add blocks from clicking smoothly
