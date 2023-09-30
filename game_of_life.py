@@ -23,7 +23,6 @@ def main():
     running = True
 
     life_list = build_life(gosper_glider_builder())
-    print(life_list)
 
     clock = pygame.time.Clock()
 
@@ -71,6 +70,7 @@ def main():
                         if count_timer > board_control:
                             count_timer = board_control
                 
+                #scroll through grid
                 if event.key == pygame.K_LEFT:
                     shift[0] = shift[0] + 10
                     pygame.display.flip()
@@ -83,6 +83,15 @@ def main():
                 if event.key == pygame.K_DOWN:
                     shift[1] = shift[1] - 10
                     pygame.display.flip()
+                
+                #zoom in and out
+                if event.key == pygame.K_n:
+                    if zoom > 0.1:
+                        zoom = zoom - 0.1
+                
+                if event.key == pygame.K_m:
+                    zoom = zoom + 0.1
+                    
             if event.type == pygame.MOUSEBUTTONDOWN:
                 # Get the position of the mouse click
                 mouseX, mouseY = pygame.mouse.get_pos()
@@ -91,25 +100,12 @@ def main():
                 life_list.append(click_life)
                 click_life.draw(window, shift[0], shift[1])
                 pygame.display.update()
-
-            # Allows for zooming and scrolling grid
-            """
-            if event.type == pygame.MOUSEWHEEL:
-                if event.y > 0:
-                    camera_y += 10 / zoom
-                if event.y < 0:
-                    camera_y -= 10 / zoom
-                if event.x > 0:
-                    camera_x += 10 / zoom
-                if event.x < 0:
-                    camera_x -= 10 / zoom
-            """
-        
+            
         # Need to update board in a manner seperate from updating screen so can add blocks from clicking smoothly
         if count_timer == board_control:
             window.fill(BLACK)
             for square in life_list:
-                square.draw(window, shift[0], shift[1])
+                square.draw(window, shift[0], shift[1], zoom)
             draw_grid(WIDTH, HEIGHT, cell_size, zoom, window, WHITE, shift[0], shift[1])
             life_list = new_life(life_list)
             life_list = life_fence(life_list)
@@ -241,10 +237,10 @@ def life_fence(my_life_list):
 
 # Just generates a grid based on screen dimensions
 def draw_grid(width, height, cell_size, zoom, screen, grid_color, shift_x, shift_y):
-    for x in range(0, width, int(cell_size * zoom)):
-        pygame.draw.line(screen, grid_color, (x - shift_x % (cell_size * zoom), -height), (x - shift_x % (cell_size * zoom), height), 1)
-    for y in range(0, height, int(cell_size * zoom)):
-        pygame.draw.line(screen, grid_color, (-width, y - shift_y % (cell_size * zoom)), (width, y - shift_y % (cell_size * zoom)), 1)
+    for x in range(0, math.floor(width*zoom), int(cell_size)):
+        pygame.draw.line(screen, grid_color, (math.floor((x - shift_x % cell_size) * zoom),math.floor( -height * zoom)), (math.floor((x - shift_x % cell_size) * zoom), math.floor(height*zoom)), 1)
+    for y in range(0, math.floor(height * zoom), int(cell_size)):
+        pygame.draw.line(screen, grid_color, (math.floor(-width * zoom), math.floor(y - shift_y % cell_size)*zoom), (math.floor(width * zoom), math.floor((y - shift_y % cell_size)*zoom)), 1)
 
 def build_life(inputList):
     returnList = []
@@ -270,11 +266,11 @@ class Life(pygame.Rect):
     def neighbors(self):
         pass
 
-    def draw(self, surface, shift_x, shift_y):
+    def draw(self, surface, shift_x, shift_y, zoom):
         # Hmm wondering why this doesn't work...
-        resolved_x = self.x_coord + shift_x
-        resolved_y = self.y_coord + shift_y
-        pygame.draw.rect(surface, self.color, (resolved_x, resolved_y, self.width, self.height))
+        resolved_x = math.floor((self.x_coord + shift_x)*zoom)
+        resolved_y = math.floor((self.y_coord + shift_y)*zoom)
+        pygame.draw.rect(surface, self.color, (resolved_x, resolved_y, math.floor(self.width * zoom), math.floor(self.height*zoom)))
 
     def get_x(self):
         return self.x
