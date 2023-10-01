@@ -41,8 +41,14 @@ def main():
     pygame.key.set_repeat(5,50)
 
     # Mouse Drag
-    drag = False
-    
+    leftDrag = False
+    rightDrag = False
+
+    initialLoop = True
+    prevX = 0
+    prevY = 0
+    prevMousePos = None
+
     while running:
 
         clock.tick(FPS)
@@ -86,32 +92,94 @@ def main():
                 
                 #zoom in and out
                 if event.key == pygame.K_n:
-                    if zoom > 0.1:
+                    if zoom > 0.2:
                         zoom = zoom - 0.1
+                        print(f"Current zoom is {zoom}")
                 
                 if event.key == pygame.K_m:
-                    zoom = zoom + 0.1
-                    
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                # Get the position of the mouse click
-                mouseX, mouseY = pygame.mouse.get_pos()
-                print(mouseX, mouseY)
-                click_life = Life(mouseX - ((mouseX + shift[0]) % 20) - shift[0], mouseY - ((mouseY + shift[1]) % 20) - shift[1], 20, 20, WHITE)
-                life_list.append(click_life)
-                click_life.draw(window, shift[0], shift[1], zoom)
-                pygame.display.update()
+                    if zoom < 2:
+                        zoom = zoom + 0.1
+                        print (f"Current zoom is {zoom}")
             
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                leftClick, middleClick, rightClick = pygame.mouse.get_pressed()
+                # Get the position of the mouse click
+                if leftClick:
+                    leftDrag = True
+                    mouseX, mouseY = pygame.mouse.get_pos()
+                    if prevX != mouseX and prevY != mouseY and initialLoop == False:
+                        click_life = Life(mouseX - ((mouseX + shift[0]) % 20) - shift[0], mouseY - ((mouseY + shift[1]) % 20) - shift[1], 20, 20, WHITE)
+                        life_list.append(click_life)
+                        click_life.draw(window, shift[0], shift[1], zoom)
+                        prevX = mouseX
+                        prevY = mouseY
+                    pygame.display.update()
+                if rightClick:
+                    rightDrag = True 
+
+                if event.button == 4:
+                    if zoom > 0.2:
+                        zoom = zoom - 0.1
+                        print(f"Current zoom is {zoom}")
+
+                if event.button == 5:
+                    if zoom < 2:
+                        zoom = zoom + 0.1
+                        print (f"Current zoom is {zoom}")
+
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 1:
+                    leftDrag = False
+                if event.button == 3:
+                    rightDrag = False
+
+            elif event.type == pygame.MOUSEMOTION:
+                if leftDrag:
+                    mouseX, mouseY = pygame.mouse.get_pos()
+                    if prevX != mouseX and prevY != mouseY and initialLoop == False:
+                        click_life = Life(mouseX - ((mouseX + shift[0]) % 20) - shift[0], mouseY - ((mouseY + shift[1]) % 20) - shift[1], 20, 20, WHITE)
+                        life_list.append(click_life)
+                        click_life.draw(window, shift[0], shift[1], zoom)
+                        prevX = mouseX
+                        prevY = mouseY
+
+                if rightDrag:
+                    currentMousePos = pygame.mouse.get_pos()
+                    if prevMousePos:
+                        delta_x = currentMousePos[0] - prevMousePos[0]
+                        delta_y = currentMousePos[1] - prevMousePos[1]
+
+                        if delta_x > 0:
+                            shift[0] = shift[0] + 10
+                        elif delta_x < 0:
+                            shift[0] = shift[0] - 10
+                        else:
+                            pass
+
+                        if delta_y > 0:
+                            shift[1] = shift[1] + 10
+                        elif delta_y < 0:
+                            shift[1] = shift[1] - 10
+                        else:
+                            pass
+                    prevMousePos = currentMousePos
+                    
+        scaled_width = math.floor(WIDTH * 1/zoom)
+        scaled_height = math.floor(HEIGHT*1/zoom)
+
         # Need to update board in a manner seperate from updating screen so can add blocks from clicking smoothly
         if count_timer == board_control:
             window.fill(BLACK)
             for square in life_list:
                 square.draw(window, shift[0], shift[1], zoom)
-            draw_grid(WIDTH, HEIGHT, cell_size, zoom, window, WHITE, shift[0], shift[1])
+            draw_grid(scaled_width, scaled_height, cell_size, zoom, window, WHITE, shift[0], shift[1])
             life_list = new_life(life_list)
             life_list = life_fence(life_list)
             pygame.display.flip()
             count_timer = 0
         count_timer += 1
+
+        initialLoop = False
 
     pygame.quit()
     sys.exit()
@@ -237,9 +305,9 @@ def life_fence(my_life_list):
 
 # Just generates a grid based on screen dimensions
 def draw_grid(width, height, cell_size, zoom, screen, grid_color, shift_x, shift_y):
-    for x in range(0, math.floor(width*zoom), int(cell_size)):
+    for x in range(0, width, int(cell_size)):
         pygame.draw.line(screen, grid_color, (math.floor((x - shift_x % cell_size) * zoom),math.floor( -height * zoom)), (math.floor((x - shift_x % cell_size) * zoom), math.floor(height*zoom)), 1)
-    for y in range(0, math.floor(height * zoom), int(cell_size)):
+    for y in range(0, height, int(cell_size)):
         pygame.draw.line(screen, grid_color, (math.floor(-width * zoom), math.floor(y - shift_y % cell_size)*zoom), (math.floor(width * zoom), math.floor((y - shift_y % cell_size)*zoom)), 1)
 
 def build_life(inputList):
