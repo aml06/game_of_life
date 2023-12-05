@@ -4,7 +4,6 @@ import numpy as np
 import math
 import random
 import time
-#average time is approximately 0.0085 seconds = 8.5 ms, next step is thinking of a faster algorithm
 
 WHITE = (255, 255, 255)
 
@@ -107,6 +106,8 @@ def main():
                 if leftClick:
                     leftDrag = True
                     mouseX, mouseY = pygame.mouse.get_pos()
+                    mouseX = math.floor(mouseX/zoom)
+                    mouseY = math.floor(mouseY/zoom)
                     if prevX != mouseX and prevY != mouseY and initialLoop == False:
                         click_life = Life(mouseX - ((mouseX + shift[0]) % 20) - shift[0], mouseY - ((mouseY + shift[1]) % 20) - shift[1], 20, 20, WHITE)
                         life_list.append(click_life)
@@ -136,6 +137,8 @@ def main():
             elif event.type == pygame.MOUSEMOTION:
                 if leftDrag:
                     mouseX, mouseY = pygame.mouse.get_pos()
+                    mouseX = math.floor(mouseX/zoom)
+                    mouseY = math.floor(mouseY/zoom)
                     if prevX != mouseX and prevY != mouseY and initialLoop == False:
                         click_life = Life(mouseX - ((mouseX + shift[0]) % 20) - shift[0], mouseY - ((mouseY + shift[1]) % 20) - shift[1], 20, 20, WHITE)
                         life_list.append(click_life)
